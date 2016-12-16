@@ -10,6 +10,8 @@ clouddriver:
     - redis
   ports:
     - "7002:7002"
+  volumes:
+    - ../../config/kube/:/root/.kube
 deck:
   container_name: deck
   environment:
