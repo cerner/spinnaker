@@ -4,10 +4,17 @@
   brew install kubernetes-cli
 	minikube start
 
+Note: It looks like there may be a problem with the latest (0.14.0) minikube and spinnaker. The most recent version that works seems to be 0.12.12. Prior to installing, run the following:
+
+  cd /usr/local/Homebrew/Library/Taps/caskroom/homebrew-cask
+  git checkout dc03239
+
+
 ### Clone Spinnaker
 
 	git clone git@github.cerner.com:norbert/spinnaker.git
   cd spinnaker
+  git checkout norbert
 
 * Copy minikube keys to ./config/kube
 
