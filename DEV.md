@@ -1,21 +1,23 @@
 ### Install minikube
 
 	brew cask install minikube
+  brew install kubernetes-cli
 	minikube start
 
 ### Clone Spinnaker
 
 	git clone git@github.cerner.com:norbert/spinnaker.git
+  cd spinnaker
 
-* Copy minikube keys to config/kube
+* Copy minikube keys to ./config/kube
 
 		cp ~/.minikube/{*.crt,*.pem,*.key} config/kube
 
 * Get minikube config
 
-		kubectl config view > config/kube/config
+		kubectl config view > ./config/kube/config
 
-* Replace ~/.minikube in paths with /opt/spinnaker/config/kube
+* Replace `~/.minikube` in config file with `/opt/spinnaker/config/kube`. For example:
 
 	    apiVersion: v1
 		clusters:
@@ -37,7 +39,6 @@
 		  user:
 		    client-certificate: /opt/spinnaker/config/kube/apiserver.crt
 		    client-key: /opt/spinnaker/config/kube/apiserver.key
-
 
 ### Create spinnaker-local.yml
 
@@ -71,7 +72,8 @@
 		      # A path to a plain text file containing the user's password
 		      passwordFile: /opt/spinnaker/config/docker/passwd
 
-	### Create clouddriver-local.yml
+
+### Create clouddriver-local.yml
 
 		dockerRegistry:
 		  enabled: ${providers.dockerRegistry.enabled:false}
@@ -87,11 +89,13 @@
 
 ### Update compose.env
 
-	SPINNAKER_DOCKER_USERNAME=<your username>
+Add:
+
+	SPINNAKER_DOCKER_USERNAME=<your hub.docker.com username>
 
 ### Add docker credentials
 
-Create `config/docker/passwd` text file with your password (and NO trailing newline or whitespace)
+Create `config/docker/passwd` text file with your hub.docker.com password (and NO trailing newline or whitespace)
 
 ### Launch!
 
