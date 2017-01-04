@@ -26,7 +26,7 @@ Note: It looks like there may be a problem with the latest (0.14.0) minikube and
 
 * Replace `~/.minikube` in config file with `/opt/spinnaker/config/kube`. For example:
 
-	    apiVersion: v1
+		apiVersion: v1
 		clusters:
 		- cluster:
 		    certificate-authority: /opt/spinnaker/config/kube/ca.crt
@@ -50,49 +50,49 @@ Note: It looks like there may be a problem with the latest (0.14.0) minikube and
 ### Create spinnaker-local.yml
 
 	providers:
-		kubernetes:
-		    # For more information on configuring Kubernetes clusters (kubernetes), see
-		    # http://www.spinnaker.io/v1.0/docs/target-deployment-setup#section-kubernetes-cluster-setup
+	  kubernetes:
+	      # For more information on configuring Kubernetes clusters (kubernetes), see
+	      # http://www.spinnaker.io/v1.0/docs/target-deployment-setup#section-kubernetes-cluster-setup
 
-		    # NOTE: enabling kubernetes also requires enabling dockerRegistry.
-		    enabled: true
-		    primaryCredentials:
-		      # These credentials use authentication information at ~/.kube/config
-		      # by default.
-		      name: minikube
-		      dockerRegistryAccount: ${providers.dockerRegistry.primaryCredentials.name}
+	      # NOTE: enabling kubernetes also requires enabling dockerRegistry.
+	      enabled: true
+	      primaryCredentials:
+	        # These credentials use authentication information at ~/.kube/config
+	        # by default.
+	        name: minikube
+	        dockerRegistryAccount: ${providers.dockerRegistry.primaryCredentials.name}
+	  dockerRegistry:
+	    # For more information on configuring Docker registries, see
+	    # http://www.spinnaker.io/v1.0/docs/target-deployment-configuration#section-docker-registry
 
-		  dockerRegistry:
-		    # For more information on configuring Docker registries, see
-		    # http://www.spinnaker.io/v1.0/docs/target-deployment-configuration#section-docker-registry
+	    # NOTE: Enabling dockerRegistry is independent of other providers.
+	    # However, for convienience, we tie docker and kubernetes together
+	    # since kubernetes (and only kubernetes) depends on this docker provider
+	    # configuration.
+	    enabled: true
 
-		    # NOTE: Enabling dockerRegistry is independent of other providers.
-		    # However, for convienience, we tie docker and kubernetes together
-		    # since kubernetes (and only kubernetes) depends on this docker provider
-		    # configuration.
-		    enabled: true
+	    primaryCredentials:
+	      name: my-docker-registry
+	      address: ${SPINNAKER_DOCKER_REGISTRY:https://index.docker.io/}
+	      username: ${SPINNAKER_DOCKER_USERNAME}
+	      # A path to a plain text file containing the user's password
+	      passwordFile: /opt/spinnaker/config/docker/passwd
 
-		    primaryCredentials:
-		      name: my-docker-registry
-		      address: ${SPINNAKER_DOCKER_REGISTRY:https://index.docker.io/}
-		      username: ${SPINNAKER_DOCKER_USERNAME}
-		      # A path to a plain text file containing the user's password
-		      passwordFile: /opt/spinnaker/config/docker/passwd
 
 
 ### Create clouddriver-local.yml
 
-		dockerRegistry:
-		  enabled: ${providers.dockerRegistry.enabled:false}
-		  accounts:
-		    - name: ${providers.dockerRegistry.primaryCredentials.name}
-		      address: ${providers.dockerRegistry.primaryCredentials.address}
-		      username: ${providers.dockerRegistry.primaryCredentials.username:}
-		      passwordFile: ${providers.dockerRegistry.primaryCredentials.passwordFile}
-		      repositories:
-		         - library/nginx
-		         - willgorman/graphite
-		         - willgorman/nginx-test
+	dockerRegistry:
+	  enabled: ${providers.dockerRegistry.enabled:false}
+	  accounts:
+	    - name: ${providers.dockerRegistry.primaryCredentials.name}
+	      address: ${providers.dockerRegistry.primaryCredentials.address}
+	      username: ${providers.dockerRegistry.primaryCredentials.username:}
+	      passwordFile: ${providers.dockerRegistry.primaryCredentials.passwordFile}
+	      repositories:
+	         - library/nginx
+	         - willgorman/graphite
+	         - willgorman/nginx-test
 
 ### Update compose.env
 
@@ -109,6 +109,9 @@ Create `config/docker/passwd` text file with your hub.docker.com password (and N
 Probably want to give your Docker VM at least 8GB RAM.
 
 	cd experimental/docker-compose
+	# Assumes you are using Docker for Mac.  
+	# If docker-machine, set DOCKER_IP appropriately (e.g. `docker-machine ip default`)
+	export DOCKER_IP=localhost
 	docker-compose up -d
 
 Now wait.  A while.
