@@ -1,10 +1,39 @@
 # DCOS Support Design Documentation
 
+## General
+
+### Naming
+
+In Spinnaker, a server group is identified by an account, region, app, stack (optional), detail (optional), and sequence; attributes that go from general to specific in that order.  Each of these attributes must appear in the name of the Marathon app representing that server group in order to avoid potential naming collisions.  Since Marathon supports groups for organization (and permissions in DC/OS) it seems like a good fit to make some of these attributes into groups rather than forcing all Marathon apps to share a single group.  
+
+The Marathon app name for a Spinnaker server group will have the structure:
+
+`/account/region/stack/app_detail_version`
+
+While stack is more specific than app in Spinnaker terms, we think it should be the opposite in the Marathon name.  If the last segment of the fully qualified Marathon app did not contain the app name it would look odd in the Marathon UI.  
+
+"Region" here would be similar to the way Kubernetes replaces regions with namespaces.  It may be called "group" or "path" and allow an arbitrary number of subgroups to be added to the path:
+
+`/account/foo/bar/baz/stack/app_detail_version`
+
+---
+
+# Projects
+
 ## Clouddriver
 
 ### Marathon app to Server Group conversion
 
 * [ ] TODO: document any questions about mapping Marathon apps to the server group concept
+
+### Marathon groups
+
+* [ ] TODO: decide if and how Marathon groups will be used by Spinnaker.
+
+A Marathon group has some similarity with a Kubernetes namespace so it could be possible to use them the same way in Spinnaker.  However there are some problems:
+
+* Namespaces are flat, groups can be nested
+* Namespaces apply to all Kubernetes deployments, including jobs.  Groups are marathon only and wouldn't apply to Metronome jobs.
 
 ### Regions & Availability Zones
 
