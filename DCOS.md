@@ -33,7 +33,7 @@ We considered automatically making stack part of the group hierarchy rather than
 
 ### Marathon groups
 
-* [ ] TODO: decide if and how Marathon groups will be used by Spinnaker.
+* [x] decide if and how Marathon groups will be used by Spinnaker. (see General/Naming)
 
 A Marathon group has some similarity with a Kubernetes namespace so it could be possible to use them the same way in Spinnaker.  However there are some problems:
 
@@ -48,10 +48,17 @@ As an aside, Kubernetes appears to use its namespaces as Spinnaker regions, whic
 
 For DCOS we have 2 decisions to make:
 
-* [ ] Do we support multiple regions, and if so, what is a region in DC/OS?
+* [x] Do we support multiple regions, and if so, what is a region in DC/OS?
+  * see General/Naming
 * [ ] Given that DC/OS does not really have availability zones but can use attributes and constraints to achieve a similar purpose, do we want to establish a convention that Spinnaker can automatically do this, or leave it entirely up to the user by letting constraints be set?
 
 ### Load Balancers
+
+#### Marathon-LB
+
+* Identifying marathon-lb instances as spinnaker loadbalancers: Load balancer instances created by Spinnaker will have a label with the key `SPINNAKER_LOAD_BALANCER`
+
+#### Enterprise Load balancer
 
 ### Security Groups
 
