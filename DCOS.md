@@ -8,13 +8,18 @@ In Spinnaker, a server group is identified by an account, region, app, stack (op
 
 The Marathon app name for a Spinnaker server group will have the structure:
 
-`/account/region/stack/app_detail_version`
+`/account/region/app_stack_detail_sequence`
 
 While stack is more specific than app in Spinnaker terms, we think it should be the opposite in the Marathon name.  If the last segment of the fully qualified Marathon app did not contain the app name it would look odd in the Marathon UI.  
 
-"Region" here would be similar to the way Kubernetes replaces regions with namespaces.  It may be called "group" or "path" and allow an arbitrary number of subgroups to be added to the path:
+"Region" here would be similar to the way Kubernetes replaces regions with namespaces.  It will be optional, however. Instead of "region" it may be called "group" or "path" and allow an arbitrary number of subgroups to be added to the path:
 
-`/account/foo/bar/baz/stack/app_detail_version`
+`/account/foo/bar/baz/app_stack_detail_sequence`
+
+We considered automatically making stack part of the group hierarchy rather than leaving it in the Marathon app name.  While that fits the way we would plan to use it, other users may have different opinions.  Since stack is optional in Spinnaker and region will allow any number of subgroups, the same effect could be achieved without forcing it on everyone.
+
+
+### Error conditions
 
 ---
 
