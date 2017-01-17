@@ -1,5 +1,9 @@
 # DCOS Support Design Documentation
 
+## Questions for Scrum
+
+* []
+
 ## General
 
 ### Naming
@@ -52,6 +56,13 @@ For DCOS we have 2 decisions to make:
   * see General/Naming
 * [ ] Given that DC/OS does not really have availability zones but can use attributes and constraints to achieve a similar purpose, do we want to establish a convention that Spinnaker can automatically do this, or leave it entirely up to the user by letting constraints be set?
 
+### Clusters
+
+* Clusters can contain server groups in different regions/namespaces and treat each as a separate deployment sequence
+
+
+![TODO: local image references](https://www.evernote.com/l/AAG_UHU0zL1HALnrHOhgS2kA3cDzQhdf8UAB/image.png)
+
 ### Load Balancers
 
 #### Marathon-LB
@@ -73,3 +84,9 @@ For DCOS we have 2 decisions to make:
 ### Logical multi-tenant deployments
 
 ### Security Tiers
+
+---
+
+## Questions for Mesosphere
+
+* [ ] Will region/namespace make sense for the new LB?
