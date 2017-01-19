@@ -71,7 +71,28 @@ For DCOS we have 2 decisions to make:
 
 #### Enterprise Load balancer
 
+#### Minuteman
+
+Minuteman VIPs can be supported minimally by allowing arbitrary attributes to be set when creating a server group, although the UI could handle these as a separate concern too.  Unlike marathon-lb there's really no need (or even a way) to interact with Minuteman through Spinnaker as it is autonomous and has no API. It does not support the zero-downtime deployment strategy but this might not disqualify it from use in canary deployment pipelines:
+
+* It may use the TASK_KILLING state as an indication to stop routing traffic to instances that are being stopped. (TODO: awaiting response from Mesosphere)
+* Applications should reasonably be expected to attempt to complete current requests after receiving SIGTERM.
+
+In this case it should always be safe to stop a marathon app behind a Minuteman VIP, as long as there are instances of a new version running behind the same VIP.
+
 ### Security Groups
+
+### Caching
+
+#### Agents
+
+Clouddriver allows each provider to register a set of agents that can be used to periodically query and cache data from the deployment target.  This allows Spinnaker to be able to construct a view of what entities exist in that target.  Caching agents can handle server groups, applications, load balancers, instances, etc.  They cache both data as well as relationships between the concepts (for example, the list of instances in a server group).  Every agent can serve as an authoritative or informational source for one or more types of entities.
+
+#### OnDemand
+
+OnDemand caching exists in order to allow Orca to refresh the cache for specific entities that are expected to change due to a pipeline step.
+
+A TTL of 10 minutes seems to be the convention, hard-coded across all the different providers.  Unclear why or what the consequences of choosing a different value would be.
 
 ## Orca
 
