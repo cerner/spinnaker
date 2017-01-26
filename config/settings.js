@@ -36,6 +36,7 @@
 // var openstackPrimaryAccount = ${providers.openstack.primaryCredentials.name};
 // var openstackDefaultRegion = ${providers.openstack.defaultRegion};
 // var appenginePrimaryAccount = ${providers.appengine.primaryCredentials.name};
+// var dcosPrimaryAccount = ${providers.docs.primaryCredentials.name};
 
 // END reconfigure_spinnaker
 /**
@@ -99,6 +100,11 @@ window.spinnakerSettings = {
       defaults: {
         account: appenginePrimaryAccount,
         editLoadBalancerStageEnabled: false,
+      }
+    },
+    dcos: {
+      defaults: {
+        account: dcosPrimaryAccount
       }
     },
   },
