@@ -121,3 +121,18 @@ Now wait.  A while.
 		minikube dashboard
 
 * Open localhost:9000 for Spinnaker UI
+
+## Running services on your machine and in containers
+
+When making changes to a service it can be quicker to run it on your machine directly instead of rebuilding the container for it.  
+
+### clouddriver
+
+If running clouddriver on your machine and the rest of the stack in containers,
+gate will need to be updated to connect to clouddriver without using the container links
+
+* See the ["I want to connect from a container to a service on the host"](https://docs.docker.com/docker-for-mac/networking/#/known-limitations-use-cases-and-workarounds) workaround:
+	* "The Mac has a changing IP address (or none if you have no network access). Our current recommendation is to attach an unused IP to the lo0 interface on the Mac; for example: sudo ifconfig lo0 alias 10.200.10.1/24, and make sure that your service is listening on this address or 0.0.0.0 (ie not 127.0.0.1). Then containers can connect to this address."
+* in docker-compose.yml:
+	* remove the clouddriver link from gate
+	* set `SERVICES_CLOUDDRIVER_HOST=10.200.10.1`
