@@ -282,6 +282,21 @@ class SpinnakerTestScenario(sk.AgentTestScenario):
         help='DEPRECATED. Replaced by --spinnaker_kubernetes_account')
 
   @classmethod
+  def _initDcosOperationConfigurationParameters(cls, parser, defaults):
+    """Initialize arguments for configuring operations for kubernetes.
+
+      parser: [argparse.ArgumentParser]
+      defaults: [dict] Default binding value overrides.
+         This is used to initialize the default commandline parameters.
+    """
+    parser.add_argument(
+        '--spinnaker_dcos_account',
+        default=defaults.get('SPINNAKER_DCOS_ACCOUNT', None),
+        help='Spinnaker account name to use for test operations against'
+             ' DC/OS. Only used when managing jobs running on'
+             ' DC/OS.')
+
+  @classmethod
   def _initOperationConfigurationParameters(cls, parser, defaults):
     """Initialize arguments for configuring operations and resources to create.
     
@@ -300,6 +315,7 @@ class SpinnakerTestScenario(sk.AgentTestScenario):
     cls._initGoogleOperationConfigurationParameters(parser, defaults)
     cls._initAwsOperationConfigurationParameters(parser, defaults)
     cls._initKubeOperationConfigurationParameters(parser, defaults)
+    cls._initDcosOperationConfigurationParameters(parser, defaults)
 
   @classmethod
   def _initObservationConfigurationParameters(cls, parser, defaults):
