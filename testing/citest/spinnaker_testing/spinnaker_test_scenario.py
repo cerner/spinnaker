@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from spinnaker_testing.dcoscli_agent import DcosCliAgent
 
 
 """Specialization of AgentTestScenario to facilitate testing Spinnaker.
@@ -21,6 +22,7 @@ to make appropriate observations.
 """
 
 import logging
+import re
 
 from citest.base import (
     ExecutionContext,
@@ -31,7 +33,6 @@ import citest.service_testing.http_agent as http_agent
 import citest.aws_testing as aws
 import citest.gcp_testing as gcp
 import citest.kube_testing as kube
-
 
 class SpinnakerTestScenario(sk.AgentTestScenario):
   """Specialization of AgentTestScenario to facilitate testing Spinnaker.
@@ -295,6 +296,17 @@ class SpinnakerTestScenario(sk.AgentTestScenario):
         help='Spinnaker account name to use for test operations against'
              ' DC/OS. Only used when managing jobs running on'
              ' DC/OS.')
+    
+    parser.add_argument(
+        '--dcos_credential_path',
+        default=defaults.get('DCOS_CREDENTIAL_PATH', None),
+        help='A path to the TOML file with auth information to use for observing'
+             ' tests run against DC/OS.')
+    
+    parser.add_argument(
+        '--dcos_master_url',
+        default=defaults.get('DCOS_MASTER_URL', 'http://localhost'),
+        help='The URL to a DC/OS master node')
 
   @classmethod
   def _initOperationConfigurationParameters(cls, parser, defaults):
@@ -362,6 +374,11 @@ class SpinnakerTestScenario(sk.AgentTestScenario):
   def kube_observer(self):
     """The observer for inspecting Kubernetes platform state, if configured."""
     return self.__kube_observer
+  
+  @property
+  def dcos_observer(self):
+    """The observer for inspecting DC/OS platform state, if configured."""
+    return self.__dcos_observer
 
   @property
   def aws_observer(self):
@@ -384,6 +401,7 @@ class SpinnakerTestScenario(sk.AgentTestScenario):
       self.__init_google_bindings()
       self.__init_aws_bindings()
       self.__init_kubernetes_bindings()
+      self.__init_dcos_bindings()
       self._do_init_bindings()
     except:
       logger = logging.getLogger(__name__)
@@ -477,6 +495,34 @@ class SpinnakerTestScenario(sk.AgentTestScenario):
       self.__kube_observer = kube.KubeCtlAgent()
     else:
       self.__kube_observer = None
+      
+  def __init_dcos_bindings(self):
+    bindings = self.bindings  # base class made a copy
+    
+    if bindings.get('DCOS_CREDENTIALS_PATH') and bindings.get('DCOS_MASTER_URL'):
+      conf = open(bindings['DCOS_CREDENTIALS_PATH'])
+      token = None
+      for line in conf:
+        match = re.search('^dcos_acs_token = "(?P<token>.*)"', line)
+        if match:
+          token = match.group('token')
+      
+      if not token:
+        raise 'Failed to read a valid DC/OS auth token from path {0}'.format(bindings['DCOS_CREDENTIALS_PATH'])
+    
+      self.__dcos_observer = http_agent.HttpAgent(bindings.get('DCOS_MASTER_URL'))
+      self.__dcos_observer.add_header('Authorization', 'token={0}'.format(token))
+    else:
+      self.__dcos_observer = None
+      logger = logging.getLogger(__name__)
+      logger.warning(
+          '--dcos_credentials_path or --dcos_master_url was not set nor could it be inferred.'
+          ' Therefore, we will not be able to observe DC/OS.')
+    # TODO CLI agent stuff
+    #     if bindings.get('SPINNAKER_DCOS_ACCOUNT'):
+    #       self.__dcos_observer = DcosCliAgent()
+    #     else:
+    #       self.__dcos_observer = None
 
   def __update_bindings_with_subsystem_configuration(self, agent):
     """Helper function for setting agent bindings from actual configuration.
