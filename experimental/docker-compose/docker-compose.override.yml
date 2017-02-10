@@ -6,9 +6,9 @@ clouddriver:
 echo: 
   volumes: 
     - "../../config:/opt/spinnaker/config"
-# deck:
-#  volumes: 
-#     - "../../config/parsedSettings.js:/opt/spinnaker/config/settings.js"
+deck:
+ volumes: 
+    - "../../config/parsedSettings.js:/opt/spinnaker/config/settings.js"
 front50: 
   volumes: 
     - "../../config:/opt/spinnaker/config"

@@ -9,6 +9,8 @@
  */
 // BEGIN reconfigure_spinnaker
 
+// var infraStagesEnabled = ${services.deck.infrastructureStages.enabled};
+// var feedbackUrl = ${services.deck.feedbackUrl};
 // var gateUrl = ${services.deck.gateUrl};
 // var authEnabled = ${services.deck.auth.enabled};
 // var defaultTimeZone = ${services.deck.timezone};
@@ -45,11 +47,16 @@
  */
 
 window.spinnakerSettings = {
+  checkForUpdates: true,
+  defaultProviders: ['aws', 'gce', 'azure', 'cf', 'kubernetes', 'dcos', 'titus', 'openstack'],
+  feedbackUrl: feedbackUrl,
   gateUrl: gateUrl,
   bakeryDetailUrl: gateUrl + '/bakery/logs/global/{{context.status.id}}',
   authEndpoint: gateUrl + '/auth/user',
   pollSchedule: 30000,
   defaultTimeZone: defaultTimeZone, // see http://momentjs.com/timezone/docs/#/data-utilities/
+  defaultCategory: 'serverGroup',
+  defaultInstancePort: 80,
   providers: {
     azure: {
       defaults: {
@@ -125,14 +132,22 @@ window.spinnakerSettings = {
     }
   },
   authEnabled: authEnabled,
+  authTtl: 600000,
+  gitSources: ['stash', 'github'],
+  triggerTypes: ['git', 'pipeline', 'docker', 'cron', 'jenkins'],
   feature: {
+    entityTags: false,
+    fiatEnabled: fiatEnabled,
     pipelines: true,
     notifications: false,
-    fastProperty: false,
-    vpcMigrator: false,
+    fastProperty: true,
+    vpcMigrator: true,
     clusterDiff: false,
-    roscoMode: true,
+    roscoMode: false,
     netflixMode: false,
-    fiatEnabled: fiatEnabled,
+    chaosMonkey: false,
+    infrastructureStages: infraStagesEnabled,
+    jobs: false,
+    snapshots: false,
   },
 };
