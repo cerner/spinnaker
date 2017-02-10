@@ -1,0 +1,61 @@
+services:
+  deck:
+    feedbackUrl: null
+    infrastructureStages:
+      enabled: false
+
+  echo:
+    notifications:
+      hipchat:
+        botName: Skynet T-800
+      slack:
+        botName: spinnakerbot
+
+providers:
+  dcos:
+    enabled: true
+    primaryCredentials:
+      name: dcos-dev
+
+  # kubernetes:
+  #   # For more information on configuring Kubernetes clusters (kubernetes), see
+  #   # http://www.spinnaker.io/v1.0/docs/target-deployment-setup#section-kubernetes-cluster-setup
+
+  #   # NOTE: enabling kubernetes also requires enabling dockerRegistry.
+  #   enabled: true
+  #   primaryCredentials:
+  #     # These credentials use authentication information at ~/.kube/config
+  #     # by default.
+  #     name: minikube
+  #     dockerRegistryAccount: ${providers.dockerRegistry.primaryCredentials.name}
+
+  # dockerRegistry:
+  #   # For more information on configuring Docker registries, see
+  #   # http://www.spinnaker.io/v1.0/docs/target-deployment-configuration#section-docker-registry
+
+  #   # NOTE: Enabling dockerRegistry is independent of other providers.
+  #   # However, for convienience, we tie docker and kubernetes together
+  #   # since kubernetes (and only kubernetes) depends on this docker provider
+  #   # configuration.
+  #   enabled: true
+
+  #   primaryCredentials:
+  #     name: my-docker-registry
+  #     address: ${SPINNAKER_DOCKER_REGISTRY:https://index.docker.io/}
+  #     username: ${SPINNAKER_DOCKER_USERNAME}
+  #     # A path to a plain text file containing the user's password
+  #     passwordFile: /opt/spinnaker/config/docker/passwd
+
+  dockerRegistry:
+    # For more information on configuring Docker registries, see
+    # http://www.spinnaker.io/v1.0/docs/target-deployment-configuration#section-docker-registry
+
+    # NOTE: Enabling dockerRegistry is independent of other providers.
+    # However, for convienience, we tie docker and kubernetes together
+    # since kubernetes (and only kubernetes) depends on this docker provider
+    # configuration.
+    enabled: true
+
+    primaryCredentials:
+      name: my-docker-registry
+      address: https://dockerhub.cerner.com/
