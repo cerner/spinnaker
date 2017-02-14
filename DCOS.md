@@ -1,9 +1,5 @@
 # DCOS Support Design Documentation
 
-## Questions for Scrum
-
-* []
-
 ## General
 
 ### Naming
@@ -14,11 +10,25 @@ The Marathon app name for a Spinnaker server group will have the structure:
 
 `/account/region/app_stack_detail_sequence`
 
-While stack is more specific than app in Spinnaker terms, we think it should be the opposite in the Marathon name.  If the last segment of the fully qualified Marathon app did not contain the app name it would look odd in the Marathon UI.  
+example:
 
-"Region" here would be similar to the way Kubernetes replaces regions with namespaces.  It will be optional, however. Instead of "region" it may be called "group" or "path" and allow an arbitrary number of subgroups to be added to the path:
+`/my_organization/my_team/usersService_prod_v001`
+
+#### Account
+
+We're making the assumption that anyone using multiple DC/OS accounts is doing so in order to allow permissions to control access and thus would always want the Marathon apps to be placed under a group for their account.  We've considered whether there would still be a need to allow Spinnaker to deploy apps in the root group, perhaps by only the primary account.  However we've decided to exclude that for now.
+
+#### Region
+
+"Region" here would be similar to the way Kubernetes replaces regions with namespaces.   Instead of "region" it may be called "group" or "path" and allow an arbitrary number of subgroups to be added to the path:
 
 `/account/foo/bar/baz/app_stack_detail_sequence`
+
+This is not exactly a conceptual fit with what Spinnaker regions are used for in AWS, Azure, etc but given that Kubernetes makes a similar stretch it seems reasonable.  One difference is that a namespace is required with Kubernetes but we would prefer to allow a group to be optional and deploy apps directly under the account group:
+
+`/account/app_stack_detail_sequence`
+
+Region seems to be assumed as required by parts of Spinnaker (orca at least) and so we can't entirely make it optional.  We think that duplicating the account into the region would be the best compromise, since account is always required.  In other words, the above app `/account/app_stack_detail_sequence` would belong to the spinnaker account `account` and the region `account`.  An app `/account/foo/bar/baz/app_stack_detail_sequence` would have account `account` and region `account/foo/bar/baz`.  This may cause some UI elements to seem redundant but apart from that seems to be good enough.
 
 We considered automatically making stack part of the group hierarchy rather than leaving it in the Marathon app name.  While that fits the way we would plan to use it, other users may have different opinions.  Since stack is optional in Spinnaker and region will allow any number of subgroups, the same effect could be achieved without forcing it on everyone.
 
