@@ -8,7 +8,7 @@ echo:
     - "../../config:/opt/spinnaker/config"
 deck:
  volumes: 
-    - "../../config/parsedSettings.js:/opt/spinnaker/config/settings.js"
+    - "../../config/deck:/opt/spinnaker/config/"
 front50: 
   volumes: 
     - "../../config:/opt/spinnaker/config"
