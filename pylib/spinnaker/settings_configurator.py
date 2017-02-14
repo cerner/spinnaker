@@ -57,7 +57,7 @@ class SettingsConfigurator(object):
     settings = self.process_deck_settings(source)
     self.check_deck_settings(settings)
 
-    target_path = os.path.join(self.installation_config_dir, 'parsedSettings.js')
+    target_path = os.path.join(self.installation_config_dir, 'deck/parsedSettings.js')
     print 'Rewriting deck settings in "{path}".'.format(path=target_path)
     with open(target_path, 'w') as f:
       f.write(''.join(settings))
