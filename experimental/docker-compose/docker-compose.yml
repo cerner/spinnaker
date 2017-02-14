@@ -28,8 +28,8 @@ echo:
   container_name: echo
   env_file: ./compose.env
   environment:
-    - "FRONT50_BASEURL=http://$DOCKER_IP:8080"
-    - "ORCA_BASEURL=http://$DOCKER_IP:8083"
+    - "FRONT50_BASEURL=http://$DOCKER_HOST_IP:8080"
+    - "ORCA_BASEURL=http://$DOCKER_HOST_IP:8083"
     - "JAVA_OPTS=-javaagent:/opt/echo/lib/jamm-0.2.5.jar"
   image: quay.io/spinnaker/echo:master
   ports:
