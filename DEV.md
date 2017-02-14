@@ -12,9 +12,9 @@ Note: It looks like there may be a problem with the latest (0.14.0) minikube and
 
 ### Clone Spinnaker
 
-	git clone git@github.cerner.com:norbert/spinnaker.git
+	git clone git@github.com:cerner/spinnaker.git
   cd spinnaker
-  git checkout norbert
+  git checkout integration
 
 * Copy minikube keys to ./config/kube
 
