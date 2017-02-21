@@ -304,23 +304,13 @@ class SpinnakerTestScenario(sk.AgentTestScenario):
       defaults: [dict] Default binding value overrides.
          This is used to initialize the default commandline parameters.
     """
+    
     parser.add_argument(
         '--spinnaker_dcos_account',
         default=defaults.get('SPINNAKER_DCOS_ACCOUNT', None),
         help='Spinnaker account name to use for test operations against'
              ' DC/OS. Only used when managing jobs running on'
              ' DC/OS.')
-    
-    parser.add_argument(
-        '--dcos_credential_path',
-        default=defaults.get('DCOS_CREDENTIAL_PATH', None),
-        help='A path to the TOML file with auth information to use for observing'
-             ' tests run against DC/OS.')
-    
-    parser.add_argument(
-        '--dcos_master_url',
-        default=defaults.get('DCOS_MASTER_URL', 'http://localhost'),
-        help='The URL to a DC/OS master node')
 
   @classmethod
   def _initOperationConfigurationParameters(cls, parser, defaults):
@@ -537,30 +527,10 @@ class SpinnakerTestScenario(sk.AgentTestScenario):
   def __init_dcos_bindings(self):
     bindings = self.bindings  # base class made a copy
     
-    if bindings.get('DCOS_CREDENTIALS_PATH') and bindings.get('DCOS_MASTER_URL'):
-      conf = open(bindings['DCOS_CREDENTIALS_PATH'])
-      token = None
-      for line in conf:
-        match = re.search('^dcos_acs_token = "(?P<token>.*)"', line)
-        if match:
-          token = match.group('token')
-      
-      if not token:
-        raise 'Failed to read a valid DC/OS auth token from path {0}'.format(bindings['DCOS_CREDENTIALS_PATH'])
-    
-      self.__dcos_observer = http_agent.HttpAgent(bindings.get('DCOS_MASTER_URL'))
-      self.__dcos_observer.add_header('Authorization', 'token={0}'.format(token))
+    if bindings.get('SPINNAKER_DCOS_ACCOUNT'):
+      self.__dcos_observer = DcosCliAgent()
     else:
       self.__dcos_observer = None
-      logger = logging.getLogger(__name__)
-      logger.warning(
-          '--dcos_credentials_path or --dcos_master_url was not set nor could it be inferred.'
-          ' Therefore, we will not be able to observe DC/OS.')
-    # TODO CLI agent stuff
-    #     if bindings.get('SPINNAKER_DCOS_ACCOUNT'):
-    #       self.__dcos_observer = DcosCliAgent()
-    #     else:
-    #       self.__dcos_observer = None
 
 
   def __update_bindings_with_subsystem_configuration(self, agent):
