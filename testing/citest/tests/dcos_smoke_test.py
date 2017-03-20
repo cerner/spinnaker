@@ -122,7 +122,7 @@ class DcosSmokeTestScenario(sk.SpinnakerTestScenario):
     (builder.new_clause_builder('Load Balancer Added', retryable_for_secs=15)
      .get_marathon_resources('app')
      .contains_path_value('id', '/{0}/{1}'.format(bindings['SPINNAKER_DCOS_ACCOUNT'], self.__lb_name)))
-    
+
     return st.OperationContract(
         self.new_post_operation(
             title='upsert_load_balancer', data=payload, path='tasks'),
@@ -154,7 +154,7 @@ class DcosSmokeTestScenario(sk.SpinnakerTestScenario):
     (builder.new_clause_builder('Load Balancer Added', retryable_for_secs=15)
      .get_marathon_resources('app')
      .excludes_path_value('id', '/{0}/{1}'.format(bindings['SPINNAKER_DCOS_ACCOUNT'], self.__lb_name)))
-    
+
     contract = jc.Contract()
     return st.OperationContract(
         self.new_post_operation(
@@ -171,7 +171,7 @@ class DcosSmokeTestScenario(sk.SpinnakerTestScenario):
     # Spinnaker determines the group name created,
     # which will be the following:
     group_name = frigga.Naming.server_group(
-        app=self.TEST_APP, 
+        app=self.TEST_APP,
         stack=bindings['TEST_STACK'],
         version='v000')
 
@@ -186,17 +186,14 @@ class DcosSmokeTestScenario(sk.SpinnakerTestScenario):
             'mem': 64,
             'docker': {
               'image': {
-                'repository': 'wg9059/nginx-test',
+                'repository': 'nginx',
                 'tag': 'canary',
-                'imageId': 'dockerhub.cerner.com/wg9059/nginx-test:canary',
-                'registry': 'dockerhub.cerner.com',
+                'imageId': 'nginx',
+                'registry': 'docker.io',
                 'account': 'my-docker-registry-account'
               }
             },
-            'networkType': {
-              "type": "BRIDGE",
-              "name": "Bridge"
-            },
+            'networkType': 'BRIDGE',
             'stack': bindings['TEST_STACK'],
             'type': 'createServerGroup',
             'region': 'default',
@@ -204,12 +201,12 @@ class DcosSmokeTestScenario(sk.SpinnakerTestScenario):
         }],
         description='Create Server Group in ' + group_name,
         application=self.TEST_APP)
-    
+
     builder = dcos.DcosContractBuilder(self.dcos_observer)
     (builder.new_clause_builder('Marathon App Added', retryable_for_secs=15)
      .get_marathon_resources('app'.format(bindings['SPINNAKER_DCOS_ACCOUNT']))
      .contains_path_value('id', '/{0}/default/{1}'.format(bindings['SPINNAKER_DCOS_ACCOUNT'], group_name)))
-    
+
     return st.OperationContract(
         self.new_post_operation(
             title='create_server_group', data=payload, path='tasks'),
@@ -219,7 +216,7 @@ class DcosSmokeTestScenario(sk.SpinnakerTestScenario):
   def delete_server_group(self, version='v000'):
     """Creates OperationContract for deleteServerGroup.
 
-    To verify the operation, we just check that the Kubernetes container
+    To verify the operation, we just check that the DC/OS application
     is no longer visible (or is in the process of terminating).
     """
     bindings = self.bindings
@@ -246,7 +243,7 @@ class DcosSmokeTestScenario(sk.SpinnakerTestScenario):
     (builder.new_clause_builder('Marathon App Added', retryable_for_secs=15)
      .get_marathon_resources('app'.format(bindings['SPINNAKER_DCOS_ACCOUNT']))
      .excludes_path_value('id', '/{0}/default/{1}'.format(bindings['SPINNAKER_DCOS_ACCOUNT'], group_name)))
-    
+
     contract = jc.Contract()
     return st.OperationContract(
         self.new_post_operation(
