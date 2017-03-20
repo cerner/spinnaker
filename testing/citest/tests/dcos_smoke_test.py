@@ -19,6 +19,7 @@ import citest.service_testing as st
 # Spinnaker modules.
 import spinnaker_testing as sk
 import spinnaker_testing.gate as gate
+import spinnaker_testing.dcos_contract as dcos
 import spinnaker_testing.frigga as frigga
 import citest.base
 
@@ -64,28 +65,6 @@ class DcosSmokeTestScenario(sk.SpinnakerTestScenario):
     # pylint: disable=invalid-name
     self.TEST_APP = bindings['TEST_APP']
 
-    #self.pipeline_id = None
-
-    # We will deploy two images. One with a tag that we want to find,
-    # and another that we don't want to find.
-    # self.__image_registry = 'gcr.io'
-    # self.__image_repository = 'kubernetes-spinnaker/test-image'
-    # self.__desired_image_tag = 'validated'
-    # self.__undesired_image_tag = 'broken'
-    # self.__desired_image_pattern = '.*{0}'.format(self.__desired_image_tag)
-
-    # image_id_format_string = '{0}/{1}:{2}'
-  
-    # self.__desired_image_id = image_id_format_string.format(
-    #     self.__image_registry,
-    #     self.__image_repository,
-    #     self.__desired_image_tag)
-  
-    # self.__undesired_image_id = image_id_format_string.format(
-    #     self.__image_registry,
-    #     self.__image_repository,
-    #     self.__undesired_image_tag)
-
   def create_app(self):
     """Creates OperationContract that creates a new Spinnaker Application."""
     contract = jc.Contract()
@@ -121,7 +100,7 @@ class DcosSmokeTestScenario(sk.SpinnakerTestScenario):
             'stack': bindings['TEST_STACK'],
             'detail': self.__lb_detail,
             'name': self.__lb_name,
-            'bindHttpHttps': True,
+            'bindHttpHttps': False,
             'account': bindings['SPINNAKER_DCOS_ACCOUNT'],
             'credentials': bindings['SPINNAKER_DCOS_ACCOUNT'],
             'cpus': 1,
@@ -135,22 +114,15 @@ class DcosSmokeTestScenario(sk.SpinnakerTestScenario):
             },
             'type': 'upsertLoadBalancer',
             'user': '[anonymous]'
-            #'securityGroups': None,
         }],
         description='Create Load Balancer: ' + self.__lb_name,
         application=self.TEST_APP)
 
-    # CLI contract stuff
-    #     builder = dcos.DcosContractBuilder(self.dcos_observer)
-    #     (builder.new_clause_builder('Load Balancer Added', retryable_for_secs=15)
-    #      .get_marathon_resources('app')
-    #      .contains_path_value('id', '/{0}/{1}'.format(bindings['SPINNAKER_DCOS_ACCOUNT'], self.__lb_name)))
-    
-    builder = st.HttpContractBuilder(self.dcos_observer)
+    builder = dcos.DcosContractBuilder(self.dcos_observer)
     (builder.new_clause_builder('Load Balancer Added', retryable_for_secs=15)
-     .get_url_path('/marathon/v2/apps/{0}/*'.format(bindings['SPINNAKER_DCOS_ACCOUNT']))
-     .contains_path_value('*/id', '/{0}/{1}'.format(bindings['SPINNAKER_DCOS_ACCOUNT'], self.__lb_name)))
-    
+     .get_marathon_resources('app')
+     .contains_path_value('id', '/{0}/{1}'.format(bindings['SPINNAKER_DCOS_ACCOUNT'], self.__lb_name)))
+
     return st.OperationContract(
         self.new_post_operation(
             title='upsert_load_balancer', data=payload, path='tasks'),
@@ -178,31 +150,105 @@ class DcosSmokeTestScenario(sk.SpinnakerTestScenario):
             bindings['SPINNAKER_DCOS_ACCOUNT']),
         application=self.TEST_APP)
 
-    builder = st.HttpContractBuilder(self.dcos_observer)
+    builder = dcos.DcosContractBuilder(self.dcos_observer)
     (builder.new_clause_builder('Load Balancer Added', retryable_for_secs=15)
-     .get_url_path('/marathon/v2/apps/{0}/*'.format(bindings['SPINNAKER_DCOS_ACCOUNT']))
-     .excludes_path_value('*/id', '/{0}/{1}'.format(bindings['SPINNAKER_DCOS_ACCOUNT'], self.__lb_name)))
-    
+     .get_marathon_resources('app')
+     .excludes_path_value('id', '/{0}/{1}'.format(bindings['SPINNAKER_DCOS_ACCOUNT'], self.__lb_name)))
+
     contract = jc.Contract()
     return st.OperationContract(
         self.new_post_operation(
             title='delete_load_balancer', data=payload, path='tasks'),
         contract=contract)
 
-  # def create_server_group(self):
-  #   """Creates OperationContract for createServerGroup.
-  #
-  #   To verify the operation, we just check that the server group was created.
-  #   """
-  #   bindings = self.bindings
+  def create_server_group(self):
+    """Creates OperationContract for createServerGroup.
 
-  # def delete_server_group(self, version='v000'):
-  #   """Creates OperationContract for deleteServerGroup.
-  #
-  #   To verify the operation, we just check that the Kubernetes container
-  #   is no longer visible (or is in the process of terminating).
-  #   """
-  #   bindings = self.bindings
+    To verify the operation, we just check that the server group was created.
+    """
+    bindings = self.bindings
+
+    # Spinnaker determines the group name created,
+    # which will be the following:
+    group_name = frigga.Naming.server_group(
+        app=self.TEST_APP,
+        stack=bindings['TEST_STACK'],
+        version='v000')
+
+    payload = self.agent.make_json_payload_from_kwargs(
+        job=[{
+            'cloudProvider': 'dcos',
+            'application': self.TEST_APP,
+            'account': bindings['SPINNAKER_DCOS_ACCOUNT'],
+            'env': {},
+            'desiredCapacity': 1,
+            'cpus': 0.1,
+            'mem': 64,
+            'docker': {
+              'image': {
+                'repository': 'nginx',
+                'tag': 'canary',
+                'imageId': 'nginx',
+                'registry': 'docker.io',
+                'account': 'my-docker-registry-account'
+              }
+            },
+            'networkType': 'BRIDGE',
+            'stack': bindings['TEST_STACK'],
+            'type': 'createServerGroup',
+            'region': 'default',
+            'user': '[anonymous]'
+        }],
+        description='Create Server Group in ' + group_name,
+        application=self.TEST_APP)
+
+    builder = dcos.DcosContractBuilder(self.dcos_observer)
+    (builder.new_clause_builder('Marathon App Added', retryable_for_secs=15)
+     .get_marathon_resources('app'.format(bindings['SPINNAKER_DCOS_ACCOUNT']))
+     .contains_path_value('id', '/{0}/default/{1}'.format(bindings['SPINNAKER_DCOS_ACCOUNT'], group_name)))
+
+    return st.OperationContract(
+        self.new_post_operation(
+            title='create_server_group', data=payload, path='tasks'),
+        contract=builder.build())
+
+
+  def delete_server_group(self, version='v000'):
+    """Creates OperationContract for deleteServerGroup.
+
+    To verify the operation, we just check that the DC/OS application
+    is no longer visible (or is in the process of terminating).
+    """
+    bindings = self.bindings
+    group_name = frigga.Naming.server_group(
+        app=self.TEST_APP, stack=bindings['TEST_STACK'], version=version)
+
+    payload = self.agent.make_json_payload_from_kwargs(
+        job=[{
+            'cloudProvider': 'dcos',
+            'type': 'destroyServerGroup',
+            'account': bindings['SPINNAKER_DCOS_ACCOUNT'],
+            'credentials': bindings['SPINNAKER_DCOS_ACCOUNT'],
+            'user': '[anonymous]',
+            'serverGroupName': group_name,
+            'asgName': group_name,
+            'regions': ['default'],
+            'region': 'default',
+            'zones': ['default']
+        }],
+        application=self.TEST_APP,
+        description='Destroy Server Group: ' + group_name)
+
+    builder = dcos.DcosContractBuilder(self.dcos_observer)
+    (builder.new_clause_builder('Marathon App Added', retryable_for_secs=15)
+     .get_marathon_resources('app'.format(bindings['SPINNAKER_DCOS_ACCOUNT']))
+     .excludes_path_value('id', '/{0}/default/{1}'.format(bindings['SPINNAKER_DCOS_ACCOUNT'], group_name)))
+
+    contract = jc.Contract()
+    return st.OperationContract(
+        self.new_post_operation(
+            title='delete_load_balancer', data=payload, path='tasks'),
+        contract=contract)
 
 
 class DcosSmokeTest(st.AgentTestCase):
@@ -224,13 +270,13 @@ class DcosSmokeTest(st.AgentTestCase):
   def test_b_upsert_load_balancer(self):
     self.run_test_case(self.scenario.upsert_load_balancer())
 
-  # def test_c_create_server_group(self):
-  #   self.run_test_case(self.scenario.create_server_group(),
-  #                      max_retries=1,
-  #                      timeout_ok=True)
+  def test_c_create_server_group(self):
+    self.run_test_case(self.scenario.create_server_group(),
+                       max_retries=1,
+                       timeout_ok=True)
 
-  # def test_x_delete_server_group(self):
-  #   self.run_test_case(self.scenario.delete_server_group('v000'), max_retries=2)
+  def test_x_delete_server_group(self):
+    self.run_test_case(self.scenario.delete_server_group('v000'), max_retries=2)
 
   def test_y_delete_load_balancer(self):
     self.run_test_case(self.scenario.delete_load_balancer(),
