@@ -109,4 +109,4 @@ In order to deploy Docker images to DC/OS a Docker registry account must be conf
 
 ## Running
 
-Now you should be able to run ```DOCKER_IP=`docker-machine ip default` docker-compose  -f docker-compose.yml -f docker-compose.override.yaml -f docker-compose.dcos.yaml  up -d``` (or if using Docker for Mac, ```DOCKER_IP=localhost docker-compose -f docker-compose.yml -f docker-compose.override.yaml -f docker-compose.dcos.yaml up -d```). After all the Spinnaker services are fully started, you should be able to access deck at `http://localhost:9000`
+Now you should be able to run ```DOCKER_IP=`docker-machine ip default` docker-compose up -d``` (or if using Docker for Mac, ```DOCKER_IP=localhost docker-compose up -d```). After all the Spinnaker services are fully started, you should be able to access deck at `http://localhost:9000`
