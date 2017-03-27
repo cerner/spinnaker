@@ -24,7 +24,7 @@ For testing, the easiest way to get started is by running a full Spinnaker stack
 
 Follow the steps the spinnaker [docker-compose](https://github.com/spinnaker/spinnaker/tree/master/experimental/docker-compose) README, with the following updates/changes for DC/OS:
 
-When running`spinnaker/experimental/docker-compose/docker-compose.yml`:
+When running `spinnaker/experimental/docker-compose/docker-compose.yml`:
 
 * Update the `clouddriver`, `orca`, and `deck` entries to reference the images with DC/OS support:
 
@@ -61,6 +61,8 @@ In the `spinnaker/config` directory:
       image: mesosphere/marathon-lb:v1.5.0
       serviceAccountSecret: marathon_lb
   ```
+  
+* Add any DCOS_USER_PASSWORD or DCOS_SERVICE_ACCOUNT_KEY values to `spinnaker/experimental/docker-compose/compose.env`
 
   In this example config, both a user account and service account are shown. For testing, the serviceKey can also be set as the Base64 encoded key directly, e.g.
   ```
