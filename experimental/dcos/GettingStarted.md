@@ -7,18 +7,18 @@ For testing, the easiest way to get started is by running a full Spinnaker stack
 ##### Supported Functionality/Limitations
 * This has been tested against DC/OS Enterprise version 1.8.x, but not the open source version.
 * Server Groups
- * Create, resize, clone, and destroy supported
- * Disable operation - this is equivalent to a "Suspend" in DC/OS. However, in most other Spinnaker cloud providers, this takes a service out of load balancing instead of suspending tasks. This will probably change with load balancer changes coming to DC/OS enterprise.
+  * Create, resize, clone, and destroy supported
+  * Disable operation - this is equivalent to a "Suspend" in DC/OS. However, in most other Spinnaker cloud providers, this takes a service out of load balancing instead of suspending tasks. This will probably change with load balancer changes coming to DC/OS enterprise.
 * Load Balancers
- * For now, load balancers are implemented using marathon-lb instances - this will likely change with load balancer changes coming to DC/OS enterprise.
- * Create, edit, delete supported
+  * For now, load balancers are implemented using marathon-lb instances - this will likely change with load balancer changes coming to DC/OS enterprise.
+  * Create, edit, delete supported
 * Security groups
- * No support
+  * No support
 * Pipelines
- * Stages supported: Check preconditions, Deploy, Destroy Server Group, Disable Cluster, Disable Server Group, Find Image from Cluster, Jenkins, Manual Judgement, Pipeline, Resize Server Group, Scale Down Cluster, Script, Shrink Cluster, Wait
- * Currently no "Run Job" stage support   
+  * Stages supported: Check preconditions, Deploy, Destroy Server Group, Disable Cluster, Disable Server Group, Find Image from Cluster, Jenkins, Manual Judgement, Pipeline, Resize Server Group, Scale Down Cluster, Script, Shrink Cluster, Wait
+  * Currently no "Run Job" stage support   
 * Server groups created in Spinnaker will be placed under a marathon group in DC/OS that corresponds to the account name you have defined in Spinnaker. For example, if you are using an account named "dcosUser" to create a server group with the name "service1", the Marathon application id will be "/dcosUser/service1-v000".
- * Along the same lines, server groups in Spinnaker are expected to have a certain naming format. DC/OS applications that don't have that format or exist in the Spinnaker account will not show up in Spinnaker.
+  * Along the same lines, server groups in Spinnaker are expected to have a certain naming format. DC/OS applications that don't have that format or exist in the Spinnaker account will not show up in Spinnaker.
 
 ## Local Installation
 
