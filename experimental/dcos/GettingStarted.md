@@ -46,20 +46,25 @@ In the `spinnaker/config` directory:
   ```
   dcos:
     enabled: ${providers.dcos.enabled:false}
+    clusters:
+      - name: default
+        dcosUrl: http://dcos.example.com
+        loadBalancer:
+          image: mesosphere/marathon-lb:v1.5.0
+          serviceAccountSecret: marathon_lb
     accounts:
       - name: some-user-account
         environment: test
-        dcosUrl: http://dcos.example.com
-        uid: dcosUserName
-        password: ${DCOS_USER_PASSWORD}
+        clusters:  
+          - name: default
+            uid: dcosUserName
+            password: ${DCOS_USER_PASSWORD}
       - name: some-service-account
         environment: test
-        dcosUrl: http://dcos.example.com
-        uid: dcosServiceAcctName
-        serviceKey: ${DCOS_SERVICE_ACCOUNT_KEY}
-    loadBalancer:
-      image: mesosphere/marathon-lb:v1.5.0
-      serviceAccountSecret: marathon_lb
+        clusters:  
+          - name: default
+            uid: dcosServiceAcctName
+            serviceKey: ${DCOS_SERVICE_ACCOUNT_KEY}
   ```
   
 * Add any DCOS_USER_PASSWORD or DCOS_SERVICE_ACCOUNT_KEY values to `spinnaker/experimental/docker-compose/compose.env`
@@ -71,12 +76,13 @@ In the `spinnaker/config` directory:
     accounts:
       - name: some-service-account
         environment: test
-        dcosUrl: http://dcos.example.com
-        uid: dcosServiceAcctName
-        serviceKey: |
-            -----BEGIN PRIVATE KEY-----
-            MIIEvQIBADANBgkqhki ...
-            -----END PRIVATE KEY-----
+        clusters:  
+          - name: default
+            uid: dcosServiceAcctName
+            serviceKey: |
+                -----BEGIN PRIVATE KEY-----
+                MIIEvQIBADANBgkqhki ...
+                -----END PRIVATE KEY-----
   ```
 
   Using an environment variable instead comes in handy if deploying Spinnaker on DC/OS Enterprise, where a secret could be used to populate the environment variable.
@@ -85,13 +91,13 @@ In the `spinnaker/config` directory:
   ```
   dcos:
     enabled: ${providers.dcos.enabled:false}
-    accounts:
-      - name: some-user-account
-        environment: test
+    clusters:
+      - name: default
         dcosUrl: http://dcos-url.com
-        uid: dcosUserName
-        password: dcosUserPw
         caCertFile: /path/to/root/certificate
+        loadBalancer:
+          image: mesosphere/marathon-lb:v1.5.0
+          serviceAccountSecret: marathon_lb
   ```
 
   `caCertData` can also be supplied instead of `caCertFile` - it is expected to be the Base64 encoded certificate data (NOT including the -----BEGIN CERTIFICATE----- and -----END CERTIFICATE----- markers).
