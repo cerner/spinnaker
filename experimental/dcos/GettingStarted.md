@@ -110,6 +110,22 @@ In the `spinnaker/config` directory:
       primaryCredentials:
         name: some-service-account
   ```
+  
+### DC/OS Permissions
+
+The user or service account should have the following permissions in DC/OS Enterprise (where `SPINNAKER_ACCOUNT_NAME` is replaced with the `dcos.accounts.name` value configured above):
+
+| Resource       | Actions        |
+| :------------- | :------------- |
+| dcos:service:marathon:marathon:services:/       | read       |
+| dcos:service:marathon:marathon:/`SPINNAKER_ACCOUNT_NAME` | create,delete,read,update |
+| dcos:service:metronome:metronome:jobs:/ | read |
+| dcos:service:metronome:metronome:jobs:/`SPINNAKER_ACCOUNT_NAME` | create,delete,read,update | 
+| dcos:secrets:default:/`SPINNAKER_ACCOUNT_NAME` | cread,delete,read,update |
+| dcos:secrets:list:default:/`SPINNAKER_ACCOUNT_NAME` | read | 
+
+**NOTE:** There is currently a marathon permissions bug that prevents instance details from being retrieved.  Until that is resolved, the only workaround we've found so far is to give the user/service account superuser permissions.  Without superuser permissions, Spinnaker is still usable but you are unable to view instance details through the Spinnaker UI.
+
 
 ### Docker Registry configuration
 
