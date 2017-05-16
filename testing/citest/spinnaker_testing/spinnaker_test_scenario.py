@@ -297,6 +297,12 @@ class SpinnakerTestScenario(sk.AgentTestScenario):
         help='Spinnaker account name to use for test operations against'
              ' DC/OS. Only used when managing jobs running on'
              ' DC/OS.')
+         
+    parser.add_argument(
+        '--spinnaker_dcos_cluster',
+        default=defaults.get('SPINNAKER_DCOS_CLUSTER', None),
+        help='The name of the DC/OS cluster to be used. This should be the name of a cluster defined in the Spinnaker'
+             ' account configuration for the account supplied with --spinnaker_dcos_account.')
 
   @classmethod
   def _initOperationConfigurationParameters(cls, parser, defaults):
