@@ -15,5 +15,5 @@ The following table describes the relationship between the clouddriver model Spi
 | Region | | This is the DC/OS cluster that a server group belongs to. 
 | Group | | To allow further arbitrary grouping in DC/OS we allow for groups to be defined which are just appended after the region to the marathon group.
 | Availability Zone | | Availability zones are not an entity in DC/OS. [Marathon constraints](https://github.com/mesosphere/marathon/blob/master/docs/docs/constraints.md) allow the spreading of server group instances across availability zones.  This is not integrated with Spinnaker beyond the ability to set these constraints as part of the server group definition.
-| Stack | | Qualification for an application name that distinguishes one cluster from another.  In Spinnaker this is often used to have a non-prod and prod stack.  In DC/OS, region can also be used for this purpose (e.g. /account/prod/app, where "prod is the region name") |
+| Stack | | Qualification for an application name that distinguishes one cluster from another.  In Spinnaker this is often used to have a non-prod and prod stack.  In DC/OS, groups can also be used for this purpose (e.g. /account/prod/app) |
 | Detail | | Qualification for an application name that further distinguishes one cluster from another |
