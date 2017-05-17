@@ -9,7 +9,7 @@ The following table describes the relationship between the clouddriver model Spi
 | Application | 0..N Clusters<br>1..N Accounts |   |
 | Cluster | 0..N Server Group<br> 1 Account<br> 1 Region | |
 | Load Balancer | 1 Account<br> 1 Region | A load balancer is an instance of [marathon-lb](https://github.com/mesosphere/marathon-lb).  Unlike load balancers in other Spinnaker providers that can be associated with applications through Spinnaker, marathon-lb's approach is to automatically manage load balancer pools using metadata (labels) in Marathon applications. |
-| Server Group | 1 Account<br>1..N Instance<br>1 Region<br>| A server group in Spinnaker is a Marathon application in DC/OS. The name of the Marathon application will have the format `/account/region/group/app_stack_detail_sequence` Adding the label "HAPROXY_GROUP" with a value of the name of the Spinnaker load balancer to a server group will assign that server group to that marathon-lb instance.|
+| Server Group | 1 Account<br>1..N Instance<br>1 Region<br>| A server group in Spinnaker is a Marathon application in DC/OS. The name of the Marathon application will have the format `/account/group/app_stack_detail_sequence` Adding the label "HAPROXY_GROUP" with a value of the name of the Spinnaker load balancer to a server group will assign that server group to that marathon-lb instance.|
 | Security Group | | No DC/OS concept applies to security groups today.  In the future perhaps this would be able control CNI plugins (like Calico) to limit access between server groups  |
 | Instance | Belongs to one server group | An instance represents a Marathon task.
 | Region | | This is the DC/OS cluster that a server group belongs to. 
