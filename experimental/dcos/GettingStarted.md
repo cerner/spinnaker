@@ -116,12 +116,20 @@ The user or service account should have the following permissions in DC/OS Enter
 
 | Resource       | Actions        |
 | :------------- | :------------- |
-| dcos:service:marathon:marathon:services:/       | read       |
-| dcos:service:marathon:marathon:/`SPINNAKER_ACCOUNT_NAME` | create,delete,read,update |
-| dcos:service:metronome:metronome:jobs:/ | read |
-| dcos:service:metronome:metronome:jobs:/`SPINNAKER_ACCOUNT_NAME` | create,delete,read,update | 
-| dcos:secrets:default:/`SPINNAKER_ACCOUNT_NAME` | cread,delete,read,update |
-| dcos:secrets:list:default:/`SPINNAKER_ACCOUNT_NAME` | read | 
+| dcos:mesos:agent:executor:app_id:/ | read |
+| dcos:mesos:agent:executor:app_id:/test | read |
+| dcos:mesos:agent:framework:role:* | read |
+| dcos:mesos:agent:sandbox:app_id | read |
+| dcos:mesos:agent:sandbox:app_id:/test | read |
+| dcos:mesos:agent:task:app_id:/test | read |
+| dcos:mesos:agent:task:app_id:test | read |
+| dcos:mesos:master:framework:role:* | read |
+| dcos:mesos:master:task:app_id:/ | read |
+| dcos:mesos:master:task:app_id:/test | create, read |
+| dcos:secrets:list:default:/ | read |
+| dcos:service:marathon:marathon:services:/       | read |
+| dcos:service:marathon:marathon:services:/`SPINNAKER_ACCOUNT_NAME` | create,delete,read,update |
+| dcos:service:metronome:metronome:jobs:/ | create,delete,read,update | 
 
 **NOTE:** There is currently a marathon permissions bug that prevents instance details from being retrieved.  Until that is resolved, the only workaround we've found so far is to give the user/service account superuser permissions.  Without superuser permissions, Spinnaker is still usable but you are unable to view instance details through the Spinnaker UI.
 
