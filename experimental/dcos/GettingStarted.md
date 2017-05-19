@@ -29,13 +29,13 @@ When running `spinnaker/experimental/docker-compose/docker-compose.yml`:
 
   ```
   clouddriver:
-    image: mtweten/clouddriver:latest
+    image: cerner/clouddriver:latest
 
   orca:
-    image: mtweten/orca:latest
+    image: cerner/orca:latest
 
   deck:
-    image: mtweten/deck:latest
+    image: cerner/deck:latest
   ```
 
 In the `spinnaker/config` directory:
