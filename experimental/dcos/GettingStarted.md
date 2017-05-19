@@ -5,7 +5,7 @@ This will run through getting a version of Spinnaker running locally that can de
 For testing, the easiest way to get started is by running a full Spinnaker stack locally using the experimental [docker-compose](https://github.com/spinnaker/spinnaker/tree/master/experimental/docker-compose) in the main Spinnaker repository. For the most part, the instructions there can be followed. Most of this document details the additional specific DC/OS configuration that is needed.
 
 ##### Supported Functionality/Limitations
-* This has been tested against DC/OS Enterprise version 1.8.x, but not the open source version.
+* This has been tested against DC/OS Enterprise version 1.9, but not the open source version.
 * Server Groups
   * Create, resize, clone, and destroy supported
   * Disable operation - this is equivalent to a "Suspend" in DC/OS. However, in most other Spinnaker cloud providers, this takes a service out of load balancing instead of suspending tasks. This will probably change with load balancer changes coming to DC/OS enterprise.
