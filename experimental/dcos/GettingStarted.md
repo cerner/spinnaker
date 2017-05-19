@@ -15,8 +15,7 @@ For testing, the easiest way to get started is by running a full Spinnaker stack
 * Security groups
   * No support
 * Pipelines
-  * Stages supported: Check preconditions, Deploy, Destroy Server Group, Disable Cluster, Disable Server Group, Find Image from Cluster, Jenkins, Manual Judgement, Pipeline, Resize Server Group, Scale Down Cluster, Script, Shrink Cluster, Wait
-  * Currently no "Run Job" stage support   
+  * Stages supported: Check preconditions, Deploy, Destroy Server Group, Disable Cluster, Disable Server Group, Find Image from Cluster, Jenkins, Manual Judgement, Pipeline, Resize Server Group, Run Job, Scale Down Cluster, Script, Shrink Cluster, Wait
 * Server groups created in Spinnaker will be placed under a marathon group in DC/OS that corresponds to the account name you have defined in Spinnaker. For example, if you are using an account named "dcosUser" to create a server group with the name "service1", the Marathon application id will be "/dcosUser/service1-v000".
   * Along the same lines, server groups in Spinnaker are expected to have a certain naming format. DC/OS applications that don't have that format or exist in the Spinnaker account will not show up in Spinnaker.
 
