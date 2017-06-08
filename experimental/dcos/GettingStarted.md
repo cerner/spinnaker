@@ -8,9 +8,9 @@ For testing, the easiest way to get started is by running a full Spinnaker stack
 * This has been tested against DC/OS Enterprise version 1.9, but not the open source version.
 * Server Groups
   * Create, resize, clone, and destroy supported
-  * Disable operation - this is equivalent to a "Suspend" in DC/OS. However, in most other Spinnaker cloud providers, this takes a service out of load balancing instead of suspending tasks. This will probably change with load balancer changes coming to DC/OS enterprise.
+  * Disable operation - this is equivalent to a "Suspend" in DC/OS. However, in most other Spinnaker cloud providers, this takes a service out of load balancing instead of suspending tasks. 
 * Load Balancers
-  * For now, load balancers are implemented using marathon-lb instances - this will likely change with load balancer changes coming to DC/OS enterprise.
+  * For now, load balancers are implemented using marathon-lb instances. Functionality is mostly limited to managing the marathon-lb instance since it automatically routes to instances rather than requiring direct interaction.
   * Create, edit, delete supported
 * Security groups
   * No support
@@ -63,7 +63,7 @@ In the `spinnaker/config` directory:
         clusters:  
           - name: default
             uid: dcosServiceAcctName
-            serviceKey: ${DCOS_SERVICE_ACCOUNT_KEY}
+            serviceKeyData: ${DCOS_SERVICE_ACCOUNT_KEY}
   ```
   
 * Add any DCOS_USER_PASSWORD or DCOS_SERVICE_ACCOUNT_KEY values to `spinnaker/experimental/docker-compose/compose.env`
@@ -78,7 +78,7 @@ In the `spinnaker/config` directory:
         clusters:  
           - name: default
             uid: dcosServiceAcctName
-            serviceKey: |
+            serviceKeyData: |
                 -----BEGIN PRIVATE KEY-----
                 MIIEvQIBADANBgkqhki ...
                 -----END PRIVATE KEY-----
