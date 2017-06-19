@@ -25,15 +25,12 @@ Follow the steps the spinnaker [docker-compose](https://github.com/spinnaker/spi
 
 When running `spinnaker/experimental/docker-compose/docker-compose.yml`:
 
-* Update the `clouddriver`, `orca`, and `deck` entries to reference the images with DC/OS support:
+* Update the `clouddriver`, and `deck` entries to reference the images with DC/OS support:
 
   ```
   clouddriver:
     image: cerner/clouddriver:latest
-
-  orca:
-    image: cerner/orca:latest
-
+    
   deck:
     image: cerner/deck:latest
   ```
