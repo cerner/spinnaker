@@ -224,8 +224,7 @@ class DcosSmokeTestScenario(sk.SpinnakerTestScenario):
         (builder.new_clause_builder('Marathon App Added', retryable_for_secs=240)
          .get_marathon_resources('app'.format(bindings['SPINNAKER_DCOS_ACCOUNT']))
          .contains_path_value('id',
-                              '/{0}/{1}/{2}'.format(bindings['SPINNAKER_DCOS_ACCOUNT'], bindings['SPINNAKER_DCOS_CLUSTER'],
-                                                    group_name)))
+                              '/{0}/{1}'.format(bindings['SPINNAKER_DCOS_ACCOUNT'], group_name)))
 
         return st.OperationContract(
             self.new_post_operation(
@@ -263,8 +262,7 @@ class DcosSmokeTestScenario(sk.SpinnakerTestScenario):
         (builder.new_clause_builder('Marathon App Deleted', retryable_for_secs=240)
          .get_marathon_resources('app'.format(bindings['SPINNAKER_DCOS_ACCOUNT']))
          .excludes_path_value('id',
-                              '/{0}/{1}/{2}'.format(bindings['SPINNAKER_DCOS_ACCOUNT'], bindings['SPINNAKER_DCOS_CLUSTER'],
-                                                    group_name)))
+                              '/{0}/{1}'.format(bindings['SPINNAKER_DCOS_ACCOUNT'], group_name)))
 
         contract = jc.Contract()
         return st.OperationContract(
@@ -390,8 +388,7 @@ class DcosSmokeTestScenario(sk.SpinnakerTestScenario):
         (builder.new_clause_builder('Marathon App deployed via pipeline', retryable_for_secs=240)
          .get_marathon_resources('app'.format(bindings['SPINNAKER_DCOS_ACCOUNT']))
          .contains_path_value('id',
-                              '/{0}/{1}/{2}'.format(bindings['SPINNAKER_DCOS_ACCOUNT'], bindings['SPINNAKER_DCOS_CLUSTER'],
-                                                    group_name)))
+                              '/{0}/{1}'.format(bindings['SPINNAKER_DCOS_ACCOUNT'], group_name)))
 
         (builder.new_clause_builder('Marathon App has expected # instances', retryable_for_secs=240)
          .get_marathon_resources('app'.format(bindings['SPINNAKER_DCOS_ACCOUNT']))
