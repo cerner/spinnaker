@@ -37,7 +37,6 @@ class DcosSmokeTestScenario(sk.SpinnakerTestScenario):
     This scenario defines the different test operations.
     We're going to:
       Create a Spinnaker Application
-      Create a Spinnaker Load Balancer
       Create a Spinnaker Server Group
       Create a Pipeline with the following stages
         - Deploy
@@ -91,91 +90,6 @@ class DcosSmokeTestScenario(sk.SpinnakerTestScenario):
             self.agent.make_delete_app_operation(
                 application=self.TEST_APP,
                 account_name=self.bindings['SPINNAKER_DCOS_ACCOUNT']),
-            contract=contract)
-
-    def upsert_load_balancer(self):
-        """Creates OperationContract for upsertLoadBalancer.
-    
-        Calls Spinnaker's upsertLoadBalancer with a configuration, then verifies
-        that the expected resources and configurations are visible on DC/OS.
-        See the contract builder for more info on what the expectations are.
-        """
-        bindings = self.bindings
-        payload = self.agent.make_json_payload_from_kwargs(
-            job=[{
-                'cloudProvider': 'dcos',
-                'availabilityZones': {bindings['SPINNAKER_DCOS_CLUSTER']: [bindings['SPINNAKER_DCOS_CLUSTER']]},
-                'provider': 'dcos',
-                'app': bindings['TEST_APP'],
-                'stack': bindings['TEST_STACK'],
-                'region': bindings['SPINNAKER_DCOS_CLUSTER'],
-                'dcosCluster': bindings['SPINNAKER_DCOS_CLUSTER'],
-                'detail': self.__lb_detail,
-                'name': self.__lb_name,
-                'bindHttpHttps': False,
-                'account': bindings['SPINNAKER_DCOS_ACCOUNT'],
-                'credentials': bindings['SPINNAKER_DCOS_ACCOUNT'],
-                'cpus': 1,
-                'instances': 1,
-                'mem': 64,
-                'acceptedResourceRoles': [],
-                'portRange': {
-                    'protocol': 'tcp',
-                    'minPort': 10000,
-                    'maxPort': 10001
-                },
-                'type': 'upsertLoadBalancer',
-                'user': '[anonymous]'
-            }],
-            description='Create Load Balancer: ' + self.__lb_name,
-            application=self.TEST_APP)
-
-        builder = dcos.DcosContractBuilder(self.dcos_observer)
-        (builder.new_clause_builder('Load Balancer Added', retryable_for_secs=240)
-         .get_marathon_resources('app')
-         .contains_path_value('id',
-                              '/{0}/{1}/{2}'.format(bindings['SPINNAKER_DCOS_ACCOUNT'], bindings['SPINNAKER_DCOS_CLUSTER'],
-                                                    self.__lb_name)))
-
-        return st.OperationContract(
-            self.new_post_operation(
-                title='upsert_load_balancer', data=payload, path='tasks'),
-            contract=builder.build())
-
-    def delete_load_balancer(self):
-        """Creates OperationContract for deleteLoadBalancer.
-    
-        To verify the operation, we just check that the DC/OS resources
-        created by upsert_load_balancer are no longer visible in the cluster.
-        """
-        bindings = self.bindings
-        payload = self.agent.make_json_payload_from_kwargs(
-            job=[{
-                'type': 'deleteLoadBalancer',
-                'cloudProvider': 'dcos',
-                'loadBalancerName': self.__lb_name,
-                'account': bindings['SPINNAKER_DCOS_ACCOUNT'],
-                'credentials': bindings['SPINNAKER_DCOS_ACCOUNT'],
-                'region': bindings['SPINNAKER_DCOS_CLUSTER'],
-                'dcosCluster': bindings['SPINNAKER_DCOS_CLUSTER'],
-                'user': '[anonymous]'
-            }],
-            description='Delete Load Balancer: {0} in {1}'.format(
-                self.__lb_name,
-                bindings['SPINNAKER_DCOS_ACCOUNT']),
-            application=self.TEST_APP)
-
-        builder = dcos.DcosContractBuilder(self.dcos_observer)
-        (builder.new_clause_builder('Load Balancer Deleted', retryable_for_secs=240)
-         .get_marathon_resources('app')
-         .excludes_path_value('id',
-                              '/{0}/{1}/{2}'.format(bindings['SPINNAKER_DCOS_ACCOUNT'], bindings['SPINNAKER_DCOS_CLUSTER'],
-                                                    self.__lb_name)))
-
-        contract = jc.Contract()
-        return st.OperationContract(
-            self.new_post_operation(
-                title='delete_load_balancer', data=payload, path='tasks'),
             contract=contract)
 
     def create_server_group(self):
@@ -267,7 +181,7 @@ class DcosSmokeTestScenario(sk.SpinnakerTestScenario):
         contract = jc.Contract()
         return st.OperationContract(
             self.new_post_operation(
-                title='delete_load_balancer', data=payload, path='tasks'),
+                title='delete_server_group', data=payload, path='tasks'),
             contract=contract)
 
     def make_deploy_stage(self, requisiteStages=[], **kwargs):
@@ -417,18 +331,15 @@ class DcosSmokeTest(st.AgentTestCase):
     def test_a_create_app(self):
         self.run_test_case(self.scenario.create_app())
 
-    def test_b_upsert_load_balancer(self):
-        self.run_test_case(self.scenario.upsert_load_balancer())
-
-    def test_c_create_server_group(self):
+    def test_b_create_server_group(self):
         self.run_test_case(self.scenario.create_server_group(),
                            max_retries=1,
                            timeout_ok=True)
 
-    def test_d_create_deploy_pipeline(self):
+    def test_c_create_deploy_pipeline(self):
         self.run_test_case(self.scenario.create_deploy_pipeline())
 
-    def test_e_run_deploy_pipeline(self):
+    def test_d_run_deploy_pipeline(self):
         self.run_test_case(self.scenario.run_deploy_pipeline())
 
     def test_x_delete_server_group(self):
@@ -436,10 +347,6 @@ class DcosSmokeTest(st.AgentTestCase):
 
     def test_x2_delete_server_group(self):
         self.run_test_case(self.scenario.delete_server_group('v001'), max_retries=2)
-
-    def test_y_delete_load_balancer(self):
-        self.run_test_case(self.scenario.delete_load_balancer(),
-                           max_retries=2)
 
     def test_z_delete_app(self):
         # Give a total of a minute because it might also need
