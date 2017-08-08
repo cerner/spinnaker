@@ -1,5 +1,7 @@
 clouddriver: 
   build: ../../../build/clouddriver
+deck: 
+  build: ../../../build/deck
 echo: 
   build: ../../../build/echo
 front50: 
@@ -15,5 +17,3 @@ rosco:
 fiat:
   build: ../../../build/fiat
 # comment out services that you don't want rebuilt like this
-# deck: 
-# build: ../../../build/deck
