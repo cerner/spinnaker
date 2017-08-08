@@ -1,36 +1,17 @@
 """
-Integration test to see if the image promotion process is working for the
-Spinnaker Kubernetes integration.
+Smoke test to see if Spinnaker can interoperate with DC/OS.
 
 See testable_service/integration_test.py and spinnaker_testing/spinnaker.py
 for more details.
 
-The test will use ssh to peek at the spinnaker configuration
-to determine the managed project it should verify, and to determine
-the spinnaker account name to use when sending it commands.
-
 Sample Usage:
-    Assuming you have created $PASSPHRASE_FILE (which you should chmod 400)
-    and $CITEST_ROOT points to the root directory of this repository
-    (which is . if you execute this from the root)
-
-  PYTHONPATH=$CITEST_ROOT:$CITEST_ROOT/spinnaker \
-    python $CITEST_ROOT/spinnaker/spinnaker_system/kube_smoke_test.py \
-    --gce_ssh_passphrase_file=$PASSPHRASE_FILE \
-    --gce_project=$PROJECT \
-    --gce_zone=$ZONE \
-    --gce_instance=$INSTANCE
-or
-  PYTHONPATH=$CITEST_ROOT:$CITEST_ROOT/spinnaker \
-    python $CITEST_ROOT/spinnaker/spinnaker_system/kube_smoke_test.py \
-    --native_hostname=host-running-smoke-test
+TODO
 """
 
 # Standard python modules.
 import sys
 
 # citest modules.
-import spinnaker_testing.dcos_contract as dcos
 import citest.json_contract as jc
 import citest.json_predicate as jp
 import citest.service_testing as st
@@ -41,7 +22,6 @@ import spinnaker_testing.gate as gate
 import spinnaker_testing.frigga as frigga
 import citest.base
 
-
 class DcosSmokeTestScenario(sk.SpinnakerTestScenario):
   """Defines the scenario for the smoke test.
 
@@ -49,8 +29,8 @@ class DcosSmokeTestScenario(sk.SpinnakerTestScenario):
   We're going to:
     Create a Spinnaker Application
     Create a Spinnaker Load Balancer
-    Create a Spinnaker Server Group
-    Create a Pipeline with the following stages
+    TODO Create a Spinnaker Server Group
+    TODO Create a Pipeline with the following stages
       - Find Image
       - Deploy
     Delete each of the above (in reverse order)
@@ -88,23 +68,23 @@ class DcosSmokeTestScenario(sk.SpinnakerTestScenario):
 
     # We will deploy two images. One with a tag that we want to find,
     # and another that we don't want to find.
-  # self.__image_registry = 'gcr.io'
-  # self.__image_repository = 'kubernetes-spinnaker/test-image'
-  # self.__desired_image_tag = 'validated'
-  # self.__undesired_image_tag = 'broken'
-  # self.__desired_image_pattern = '.*{0}'.format(self.__desired_image_tag)
+    # self.__image_registry = 'gcr.io'
+    # self.__image_repository = 'kubernetes-spinnaker/test-image'
+    # self.__desired_image_tag = 'validated'
+    # self.__undesired_image_tag = 'broken'
+    # self.__desired_image_pattern = '.*{0}'.format(self.__desired_image_tag)
 
-  # image_id_format_string = '{0}/{1}:{2}'
-
-  # self.__desired_image_id = image_id_format_string.format(
-  #     self.__image_registry,
-  #     self.__image_repository,
-  #     self.__desired_image_tag)
-
-  # self.__undesired_image_id = image_id_format_string.format(
-  #     self.__image_registry,
-  #     self.__image_repository,
-  #     self.__undesired_image_tag)
+    # image_id_format_string = '{0}/{1}:{2}'
+  
+    # self.__desired_image_id = image_id_format_string.format(
+    #     self.__image_registry,
+    #     self.__image_repository,
+    #     self.__desired_image_tag)
+  
+    # self.__undesired_image_id = image_id_format_string.format(
+    #     self.__image_registry,
+    #     self.__image_repository,
+    #     self.__undesired_image_tag)
 
   def create_app(self):
     """Creates OperationContract that creates a new Spinnaker Application."""
@@ -128,7 +108,7 @@ class DcosSmokeTestScenario(sk.SpinnakerTestScenario):
     """Creates OperationContract for upsertLoadBalancer.
 
     Calls Spinnaker's upsertLoadBalancer with a configuration, then verifies
-    that the expected resources and configurations are visible on Kubernetes.
+    that the expected resources and configurations are visible on DC/OS.
     See the contract builder for more info on what the expectations are.
     """
     bindings = self.bindings
@@ -137,7 +117,7 @@ class DcosSmokeTestScenario(sk.SpinnakerTestScenario):
             'cloudProvider': 'dcos',
             'availabilityZones': {'global': ['global']},
             'provider': 'dcos',
-            #'app': bindings['TEST_APP']
+            'app': bindings['TEST_APP'],
             'stack': bindings['TEST_STACK'],
             'detail': self.__lb_detail,
             'name': self.__lb_name,
@@ -160,22 +140,26 @@ class DcosSmokeTestScenario(sk.SpinnakerTestScenario):
         description='Create Load Balancer: ' + self.__lb_name,
         application=self.TEST_APP)
 
-    # builder = kube.KubeContractBuilder(self.kube_observer)
-    # (builder.new_clause_builder('Service Added', retryable_for_secs=15)
-    #  .get_resources('svc')
-    #  .contains_path_value('items/metadata/name', self.__lb_name))
-
-    contract = jc.Contract()
-
+    # CLI contract stuff
+    #     builder = dcos.DcosContractBuilder(self.dcos_observer)
+    #     (builder.new_clause_builder('Load Balancer Added', retryable_for_secs=15)
+    #      .get_marathon_resources('app')
+    #      .contains_path_value('id', '/{0}/{1}'.format(bindings['SPINNAKER_DCOS_ACCOUNT'], self.__lb_name)))
+    
+    builder = st.HttpContractBuilder(self.dcos_observer)
+    (builder.new_clause_builder('Load Balancer Added', retryable_for_secs=15)
+     .get_url_path('/marathon/v2/apps/{0}/*'.format(bindings['SPINNAKER_DCOS_ACCOUNT']))
+     .contains_path_value('*/id', '/{0}/{1}'.format(bindings['SPINNAKER_DCOS_ACCOUNT'], self.__lb_name)))
+    
     return st.OperationContract(
         self.new_post_operation(
             title='upsert_load_balancer', data=payload, path='tasks'),
-        contract=contract)
+        contract=builder.build())
 
   def delete_load_balancer(self):
     """Creates OperationContract for deleteLoadBalancer.
 
-    To verify the operation, we just check that the Kubernetes resources
+    To verify the operation, we just check that the DC/OS resources
     created by upsert_load_balancer are no longer visible in the cluster.
     """
     bindings = self.bindings
@@ -194,9 +178,11 @@ class DcosSmokeTestScenario(sk.SpinnakerTestScenario):
             bindings['SPINNAKER_DCOS_ACCOUNT']),
         application=self.TEST_APP)
 
-    # builder = kube.KubeContractBuilder(self.kube_observer)
-    # (builder.new_clause_builder('Service Removed', retryable_for_secs=15)
-    #  .get_resources('svc', no_resource_ok=True))
+    builder = st.HttpContractBuilder(self.dcos_observer)
+    (builder.new_clause_builder('Load Balancer Added', retryable_for_secs=15)
+     .get_url_path('/marathon/v2/apps/{0}/*'.format(bindings['SPINNAKER_DCOS_ACCOUNT']))
+     .excludes_path_value('*/id', '/{0}/{1}'.format(bindings['SPINNAKER_DCOS_ACCOUNT'], self.__lb_name)))
+    
     contract = jc.Contract()
     return st.OperationContract(
         self.new_post_operation(
@@ -205,244 +191,18 @@ class DcosSmokeTestScenario(sk.SpinnakerTestScenario):
 
   # def create_server_group(self):
   #   """Creates OperationContract for createServerGroup.
-
+  #
   #   To verify the operation, we just check that the server group was created.
   #   """
   #   bindings = self.bindings
 
-  #   # Spinnaker determines the group name created,
-  #   # which will be the following:
-  #   group_name = frigga.Naming.server_group(
-  #       app=self.TEST_APP, 
-  #       stack=bindings['TEST_STACK'],
-  #       version='v000')
-
-  #   payload = self.agent.make_json_payload_from_kwargs(
-  #       job=[{
-  #           'cloudProvider': 'kubernetes',
-  #           'application': self.TEST_APP,
-  #           'account': bindings['SPINNAKER_KUBERNETES_ACCOUNT'],
-  #           'strategy':'',
-  #           'targetSize': 1,
-  #           'containers': [{
-  #               'name': 'validated',
-  #               'imageDescription': {
-  #                   'repository': self.__image_repository,
-  #                   'tag': self.__desired_image_tag,
-  #                   'imageId': self.__desired_image_id,
-  #                   'registry': self.__image_registry
-  #               },
-  #               'requests': {'memory':None, 'cpu':None},
-  #               'limits': {'memory':None, 'cpu':None},
-  #               'ports':[{'name':'http', 'containerPort':80,
-  #                         'protocol':'TCP', 'hostPort':None, 'hostIp':None}]
-  #           }, 
-  #           {
-  #               'name': 'broken',
-  #               'imageDescription': {
-  #                   'repository': self.__image_repository,
-  #                   'tag': self.__undesired_image_tag,
-  #                   'imageId': self.__undesired_image_id,
-  #                   'registry': self.__image_registry
-  #               },
-  #               'requests': {'memory':None, 'cpu':None},
-  #               'limits': {'memory':None, 'cpu':None},
-  #               'ports':[{'name':'http', 'containerPort':80,
-  #                         'protocol':'TCP', 'hostPort':None, 'hostIp':None}]
-  #           }
-  #           ],
-  #           'stack': bindings['TEST_STACK'],
-  #           'loadBalancers': [self.__lb_name],
-  #           'type': 'createServerGroup',
-  #           'region': 'default',
-  #           'user': '[anonymous]'
-  #       }],
-  #       description='Create Server Group in ' + group_name,
-  #       application=self.TEST_APP)
-
-  #   builder = kube.KubeContractBuilder(self.kube_observer)
-  #   (builder.new_clause_builder('Replica Set Added',
-  #                               retryable_for_secs=15)
-  #    .get_resources('rs', extra_args=[group_name])
-  #    .contains_path_eq('spec/replicas', 1))
-
-  #   return st.OperationContract(
-  #       self.new_post_operation(
-  #           title='create_server_group', data=payload, path='tasks'),
-  #       contract=builder.build())
-
-  # def make_smoke_stage(self, requisiteStages=[], **kwargs):
-  #   result = {
-  #     'requisiteStageRefIds': requisiteStages,
-  #     'refId': 'FINDIMAGE',
-  #     'type': 'findImage',
-  #     'name': 'Find Valid Image',
-  #     'cloudProviderType': 'kubernetes', 
-  #     'namespaces': ['default'], 
-  #     'cloudProvider': 'kubernetes',
-  #     'selectionStrategy': 'NEWEST',
-  #     'onlyEnabled': True,
-  #     'credentials': self.bindings['SPINNAKER_KUBERNETES_ACCOUNT'],
-  #     'cluster': frigga.Naming.cluster(
-  #         app=self.TEST_APP, stack=self.bindings['TEST_STACK']),
-  #     'imageNamePattern': self.__desired_image_pattern
-  #   } 
-
-  #   result.update(kwargs)
-  #   return result
-
-  # def make_deploy_stage(self, imageSource=None, requisiteStages=[], **kwargs):
-  #   bindings = self.bindings
-  #   cluster = frigga.Naming.cluster(
-  #       app=self.TEST_APP, 
-  #       stack=self.bindings['TEST_STACK'])
-  #   result = {
-  #     'requisiteStageRefIds': requisiteStages,
-  #     'refId': 'DEPLOY',
-  #     'type': 'deploy',
-  #     'name': 'Deploy Validated Image',
-  #     'clusters': [
-  #       {
-  #         'account': 'my-kubernetes-account',
-  #         'application': self.TEST_APP,
-  #         'stack': bindings['TEST_STACK'],
-  #         'loadBalancers': [self.__lb_name],
-  #         'strategy': '',
-  #         'targetSize': 1,
-  #         'cloudProvider': 'kubernetes',
-  #         'namespace': 'default',
-  #         'containers': [
-  #           {
-  #             'name': 'validated',
-  #             'imageDescription': {
-  #               'repository': 'Find Image',
-  #               'imageId':'{0} {1}'.format(
-  #                   cluster, 
-  #                   self.__desired_image_pattern),
-  #               'fromContext': True,
-  #               'cluster': cluster,
-  #               'pattern': self.__desired_image_pattern,
-  #               'stageId': imageSource
-  #              },
-  #             'requests': {'memory':None,'cpu':None},
-  #             'limits': {'memory':None,'cpu':None},
-  #             'ports': [{'name':'http','containerPort':80,
-  #               'protocol':'TCP','hostPort':None,'hostIp':None}],
-  #             'livenessProbe': None,
-  #             'readinessProbe': None, 'envVars': [],
-  #             'command': [],
-  #             'args': [],
-  #             'volumeMounts': []
-  #           }
-  #         ],
-  #         'volumeSources': [],
-  #         'provider': 'kubernetes',
-  #         'region': 'default'
-  #       }
-  #     ]
-  #   }
-
-  #   result.update(kwargs)
-  #   return result
-
-  # def create_find_image_pipeline(self):
-  #   name = 'findImagePipeline'
-  #   self.pipeline_id = name
-  #   smoke_stage = self.make_smoke_stage()
-  #   deploy_stage = self.make_deploy_stage(
-  #       imageSource='FINDIMAGE', 
-  #       requisiteStages=['FINDIMAGE'])
-
-  #   pipeline_spec = dict(
-  #     name=name,
-  #     stages=[smoke_stage,  deploy_stage],
-  #     triggers=[],
-  #     application=self.TEST_APP,
-  #     stageCounter=2,
-  #     parallel=True,
-  #     limitConcurrent=True,
-  #     executionEngine='v2',
-  #     appConfig={},
-  #     index=0
-  #   )
-
-  #   payload = self.agent.make_json_payload_from_kwargs(**pipeline_spec)
-
-  #   builder = st.HttpContractBuilder(self.agent)
-  #   (builder.new_clause_builder('Has Pipeline',
-  #                               retryable_for_secs=5)
-  #       .get_url_path(
-  #         'applications/{app}/pipelineConfigs'.format(app=self.TEST_APP))
-  #       .contains_path_value(None, pipeline_spec))
-
-  #   return st.OperationContract(
-  #       self.new_post_operation(
-  #           title='create_find_image_pipeline', data=payload, path='pipelines',
-  #           status_class=st.SynchronousHttpOperationStatus),
-  #       contract=builder.build())
-
   # def delete_server_group(self, version='v000'):
   #   """Creates OperationContract for deleteServerGroup.
-
+  #
   #   To verify the operation, we just check that the Kubernetes container
   #   is no longer visible (or is in the process of terminating).
   #   """
   #   bindings = self.bindings
-  #   group_name = frigga.Naming.server_group(
-  #       app=self.TEST_APP, stack=bindings['TEST_STACK'], version=version)
-
-  #   payload = self.agent.make_json_payload_from_kwargs(
-  #       job=[{
-  #           'cloudProvider': 'kubernetes',
-  #           'type': 'destroyServerGroup',
-  #           'account': bindings['SPINNAKER_KUBERNETES_ACCOUNT'],
-  #           'credentials': bindings['SPINNAKER_KUBERNETES_ACCOUNT'],
-  #           'user': '[anonymous]',
-  #           'serverGroupName': group_name,
-  #           'asgName': group_name,
-  #           'regions': ['default'],
-  #           'region': 'default',
-  #           'zones': ['default'],
-  #           'interestingHealthProviderNames': ['KubernetesService']
-  #       }],
-  #       application=self.TEST_APP,
-  #       description='Destroy Server Group: ' + group_name)
-
-  #   builder = kube.KubeContractBuilder(self.kube_observer)
-  #   (builder.new_clause_builder('Replica Set Removed')
-  #    .get_resources('rs', extra_args=[group_name],
-  #                   no_resource_ok=True)
-  #    .contains_path_eq('targetSize', 0))
-
-  #   return st.OperationContract(
-  #       self.new_post_operation(
-  #           title='delete_server_group', data=payload, path='tasks'),
-  #       contract=builder.build())
-
-  # def run_find_image_pipeline(self):
-  #   path = 'pipelines/{0}/{1}'.format(self.TEST_APP, self.pipeline_id)
-  #   bindings = self.bindings
-  #   group_name = frigga.Naming.server_group(
-  #       app=self.TEST_APP, 
-  #       stack=bindings['TEST_STACK'],
-  #       version='v001')
-
-  #   payload = self.agent.make_json_payload_from_kwargs(
-  #       type='manual',
-  #       user='[anonymous]')
-
-  #   builder = kube.KubeContractBuilder(self.kube_observer)
-  #   (builder.new_clause_builder('Replica Set Added',
-  #                               retryable_for_secs=15)
-  #    .get_resources('rs', extra_args=[group_name])
-  #    .contains_path_eq(
-  #        'spec/template/spec/containers/image', 
-  #        self.__desired_image_id))
-
-  #   return st.OperationContract(
-  #       self.new_post_operation(
-  #           title='run_find_image_pipeline', data=payload, path=path),
-  #           builder.build())
 
 
 class DcosSmokeTest(st.AgentTestCase):
@@ -469,17 +229,8 @@ class DcosSmokeTest(st.AgentTestCase):
   #                      max_retries=1,
   #                      timeout_ok=True)
 
-  # def test_d_create_find_image_pipeline(self):
-  #   self.run_test_case(self.scenario.create_find_image_pipeline())
-
-  # def test_e_run_find_image_pipeline(self):
-  #   self.run_test_case(self.scenario.run_find_image_pipeline())
-
-  # def test_x1_delete_server_group(self):
+  # def test_x_delete_server_group(self):
   #   self.run_test_case(self.scenario.delete_server_group('v000'), max_retries=2)
-
-  # def test_x2_delete_server_group(self):
-  #   self.run_test_case(self.scenario.delete_server_group('v001'), max_retries=2)
 
   def test_y_delete_load_balancer(self):
     self.run_test_case(self.scenario.delete_load_balancer(),
