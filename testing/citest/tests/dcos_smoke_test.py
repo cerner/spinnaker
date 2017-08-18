@@ -22,11 +22,11 @@ import sys
 import citest.json_contract as jc
 import citest.json_predicate as jp
 import citest.service_testing as st
+import citest.dcos_testing as dcos
 
 # Spinnaker modules.
 import spinnaker_testing as sk
 import spinnaker_testing.gate as gate
-import spinnaker_testing.dcos_contract as dcos
 import spinnaker_testing.frigga as frigga
 import citest.base
 
@@ -120,8 +120,7 @@ class DcosSmokeTestScenario(sk.SpinnakerTestScenario):
                         'repository': 'nginx',
                         'tag': 'canary',
                         'imageId': 'nginx',
-                        'registry': 'docker.io',
-                        'account': 'my-docker-registry-account'
+                        'registry': 'docker.io'
                     }
                 },
                 'networkType': 'BRIDGE',
@@ -205,8 +204,7 @@ class DcosSmokeTestScenario(sk.SpinnakerTestScenario):
                             'repository': 'nginx',
                             'tag': 'canary',
                             'imageId': 'nginx',
-                            'registry': 'docker.io',
-                            'account': 'my-docker-registry-account'
+                            'registry': 'docker.io'
                         }
                     },
                     'networkType': 'BRIDGE',

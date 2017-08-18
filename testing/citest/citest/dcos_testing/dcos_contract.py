@@ -1,3 +1,17 @@
+# Copyright 2017 Cerner Corporation All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 """Provides a means for specifying and verifying expectations of DC/OS."""
 
 # Standard python modules.
@@ -102,39 +116,18 @@ class DcosClauseBuilder(jc.ContractClauseBuilder):
     self.__factory = DcosObjectFactory(dcoscli)
     self.__strict = strict
 
-  def get_marathon_resources(self, type, extra_args=None, no_resource_ok=False):
+  def get_marathon_resources(self, type, extra_args=None):
     """Observe resources of a particular type.
 
     This ultimately calls a "dcos marathon |type| |extra_args|"
 
-    Args:
-      no_resource_ok: Whether or not the resource is required.
-          If the resource is not required, "not found" is treated as a valid
-          check. Because resource deletion is asynchronous, there is no
-          explicit API here to confirm that a resource does not exist.
     """
     self.observer = self.__factory.new_get_marathon_resources(
         type, action='list', extra_args=extra_args)
 
-    if no_resource_ok:
-      # Unfortunately gcloud does not surface the actual 404 but prints an
-      # error message saying that it was not found.
-      error_verifier = cli_agent.CliAgentObservationFailureVerifier(
-          title='Not Found Permitted', error_regex='.* not found')
-      disjunction_builder = jc.ObservationVerifierBuilder(
-          'Get {0} {1} or Not Found'.format(type, extra_args))
-      disjunction_builder.append_verifier(error_verifier)
-
-      get_builder = jc.ValueObservationVerifierBuilder(
-          'Get {0} {1}'.format(type, extra_args), strict=self.__strict)
-      disjunction_builder.append_verifier_builder(
-          get_builder, new_term=True)
-      self.verifier_builder.append_verifier_builder(
-          disjunction_builder, new_term=True)
-    else:
-      get_builder = jc.ValueObservationVerifierBuilder(
-          'Get {0} {1}'.format(type, extra_args), strict=self.__strict)
-      self.verifier_builder.append_verifier_builder(get_builder)
+    get_builder = jc.ValueObservationVerifierBuilder(
+        'Get {0} {1}'.format(type, extra_args), strict=self.__strict)
+    self.verifier_builder.append_verifier_builder(get_builder)
 
     return get_builder
 

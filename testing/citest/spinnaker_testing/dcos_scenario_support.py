@@ -14,7 +14,7 @@
 
 """DC/OS platform and test support for SpinnakerTestScenario."""
 
-from spinnaker_testing.dcoscli_agent import DcosCliAgent
+import citest.dcos_testing as dcos
 from spinnaker_testing.base_scenario_support import BaseScenarioPlatformSupport
 
 
@@ -58,7 +58,7 @@ class DcosScenarioSupport(BaseScenarioPlatformSupport):
     if not bindings.get('SPINNAKER_DCOS_CLUSTER'):
       raise ValueError('There is no "spinnaker_dcos_cluster"')
 
-    return DcosCliAgent()
+    return dcos.DcosCliAgent()
 
   def __init__(self, scenario):
     """Constructor.
