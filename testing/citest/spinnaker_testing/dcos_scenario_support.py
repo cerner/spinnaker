@@ -49,6 +49,11 @@ class DcosScenarioSupport(BaseScenarioPlatformSupport):
              ' configuration for the account supplied with'
              ' --spinnaker_dcos_account.')
 
+    builder.add_argument(
+        '--spinnaker_docker_account',
+        default=defaults.get('SPINNAKER_DOCKER_ACCOUNT', 'my-docker-registry-account'),
+        help='The name of the Spinnaker Docker registry account to use.')
+
   def _make_observer(self):
     """Implements BaseScenarioPlatformSupport interface."""
     bindings = self.scenario.bindings

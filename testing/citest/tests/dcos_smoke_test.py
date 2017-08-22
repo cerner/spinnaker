@@ -120,7 +120,8 @@ class DcosSmokeTestScenario(sk.SpinnakerTestScenario):
                         'repository': 'nginx',
                         'tag': 'canary',
                         'imageId': 'nginx',
-                        'registry': 'docker.io'
+                        'registry': 'docker.io',
+                        'account': bindings['SPINNAKER_DOCKER_ACCOUNT']
                     }
                 },
                 'networkType': 'BRIDGE',
@@ -204,7 +205,8 @@ class DcosSmokeTestScenario(sk.SpinnakerTestScenario):
                             'repository': 'nginx',
                             'tag': 'canary',
                             'imageId': 'nginx',
-                            'registry': 'docker.io'
+                            'registry': 'docker.io',
+                            'account': bindings['SPINNAKER_DOCKER_ACCOUNT']
                         }
                     },
                     'networkType': 'BRIDGE',
