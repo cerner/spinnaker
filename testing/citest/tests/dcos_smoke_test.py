@@ -22,7 +22,7 @@ import sys
 import citest.json_contract as jc
 import citest.json_predicate as jp
 import citest.service_testing as st
-import citest.dcos_testing as dcos
+import citest_contrib.dcos_testing as dcos
 
 # Spinnaker modules.
 import spinnaker_testing as sk

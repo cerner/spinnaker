@@ -14,7 +14,7 @@
 
 """DC/OS platform and test support for SpinnakerTestScenario."""
 
-import citest.dcos_testing as dcos
+import citest_contrib.dcos_testing as dcos
 from spinnaker_testing.base_scenario_support import BaseScenarioPlatformSupport
 
 
